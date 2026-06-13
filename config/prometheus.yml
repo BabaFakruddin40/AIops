@@ -1,0 +1,59 @@
+# Prometheus configuration for AIops monitoring
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    monitor: 'aiops-monitor'
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          # - 'alertmanager:9093'
+
+# Load rules
+rule_files:
+  # - "alert_rules.yml"
+  # - "recording_rules.yml"
+
+scrape_configs:
+  # Scrape Prometheus itself
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # AIops Backend Metrics
+  - job_name: 'aiops-backend'
+    static_configs:
+      - targets: ['backend:5000']
+    metrics_path: '/metrics'
+    scrape_interval: 15s
+
+  # Node Exporter (if using local node monitoring)
+  # - job_name: 'node'
+  #   static_configs:
+  #     - targets: ['node-exporter:9100']
+
+  # Kubernetes Metrics (if running in Kubernetes)
+  # - job_name: 'kubernetes-apiservers'
+  #   kubernetes_sd_configs:
+  #   - role: endpoints
+  #   scheme: https
+  #   tls_config:
+  #     ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+  #   bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+
+  # Docker Metrics (if using Docker)
+  # - job_name: 'docker'
+  #   static_configs:
+  #     - targets: ['localhost:9323']
+
+  # Custom application metrics
+  - job_name: 'aiops-app'
+    static_configs:
+      - targets: ['localhost:5000']
+    metrics_path: '/api/v1/metrics/prometheus'
+    scrape_interval: 30s
+    scrape_timeout: 10s
